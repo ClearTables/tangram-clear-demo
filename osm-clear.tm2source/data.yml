@@ -1,0 +1,141 @@
+_prefs:
+  disabled: []
+  inspector: false
+  mapid: ''
+  rev: ''
+  saveCenter: false
+name: OSM Clear
+description: A style designed for use with ClearTables
+attribution: 'Data © OpenStreetMap contributors'
+center:
+  - 0
+  - 0
+  - 4
+minzoom: 0
+maxzoom: 16
+# Various parts to be included later on
+_parts:
+  # Extents are used for tilemill, and don't actually make it to the generated XML
+  extents: &extents
+    extent: -20037508,-20037508,20037508,20037508
+    srs-name: "900913"
+    srs: "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over"
+  osm2pgsql: &osm2pgsql
+    type: postgis
+    dbname: "gis"
+    key_field: ""
+    geometry_field: "way"
+    extent: "-20037508,-20037508,20037508,20037508"
+Layer:
+  - id: water
+    geometry: polygon
+    <<: *extents
+    Datasource:
+      <<: *osm2pgsql
+      table: |-
+        (SELECT
+            way
+          FROM water_areas
+          WHERE way_area > 0.01*!pixel_width!::real*!pixel_height!::real
+            AND z(!scale_denominator!) >= 6
+        UNION ALL
+        SELECT
+            way
+          FROM ocean
+          WHERE z(!scale_denominator!) >= 10
+        UNION ALL
+        SELECT
+            way
+          FROM simplified_ocean
+          WHERE z(!scale_denominator!) < 10
+        ) AS water
+  - id: waterways
+    geometry: linestring
+    <<: *extents
+    Datasource:
+      <<: *osm2pgsql
+      table: |-
+        (SELECT
+            way,
+            waterway,
+            brunnel,
+            intermittent
+          FROM waterways
+          WHERE waterway IN ('river')
+            OR (z(!scale_denominator!) >= 7 AND waterway IN ('canal'))
+            OR (z(!scale_denominator!) >= 11 AND waterway IN ('stream'))
+            OR (z(!scale_denominator!) >= 13 AND waterway IN ('drain', 'ditch'))
+          ORDER BY layer
+        ) AS waterways
+    properties:
+      minzoom: 5
+  - id: buildings
+    geometry: polygon
+    <<: *extents
+    Datasource:
+      <<: *osm2pgsql
+      table: |-
+        (SELECT
+            way,
+            COALESCE(height,levels*3.66,5) AS height
+          FROM buildings
+          WHERE way_area > 0.01*!pixel_width!::real*!pixel_height!::real
+          ORDER BY height, ST_YMin(way) DESC
+        ) AS buildings
+    properties:
+      minzoom: 12
+  - id: transportation
+    geometry: linestring
+    <<: *extents
+    Datasource:
+      <<: *osm2pgsql
+      table: |-
+        (SELECT
+            way,
+            name,
+            class::text,
+            layer,
+            ramp,
+            brunnel::text -- does this need to be text?
+          FROM (SELECT
+              way,
+              name,
+              class,
+              layer,
+              brunnel,
+              ramp,
+              NULL::real AS way_area
+            FROM roads
+            WHERE class IN ('motorway','trunk','primary')
+              OR (z(!scale_denominator!) >= 6 AND class IN ('secondary'))
+              OR (z(!scale_denominator!) >= 8 AND class IN ('tertiary'))
+              OR (z(!scale_denominator!) >= 11 AND class IN ('minor'))
+              OR z(!scale_denominator!) >= 12
+          UNION ALL
+          SELECT
+              way,
+              name,
+              class,
+              layer,
+              brunnel,
+              NULL::boolean AS ramp,
+              NULL::real AS way_area
+            FROM rail
+          UNION ALL
+          SELECT
+              way,
+              name,
+              class,
+              layer,
+              brunnel,
+              NULL::boolean AS ramp,
+              way_area
+            FROM road_areas
+            WHERE z(!scale_denominator!) >= 12
+            ORDER BY layer DESC,
+              ramp ASC,
+              class DESC,
+              way_area ASC NULLS FIRST) AS q
+        ) AS transportation
+    properties:
+      minzoom: 4
