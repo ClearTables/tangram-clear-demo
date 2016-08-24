@@ -21,10 +21,14 @@ styles:
     flatpolys:
         base: polygons
         lighting: false # ignore lights
+    flattext:
+        base: text
+        lighting: false
     # This needs to be rendered on top of other lines, so we prefix the name with 0
     0railway:
         base: lines
-        dash: [10, 10]
+        dash: [7, 7]
+
 
     buildings:
         base: polygons
@@ -36,51 +40,40 @@ styles:
 sources:
     clear:
         type: MVT
-        url: http://192.168.1.1:6789/osm-clear.tm2source/tile/{z}/{x}/{y}.pbf
+        url: http://tangram-clear-demo.faramir.paulnorman.ca/{z}/{x}/{y}.pbf
         max_zoom: 16
 
 layers:
     water:
-        data: { source: mapzen}
+        data: { source: clear}
         draw:
-            polygons:
-                order: 2
-                color: &water-color '#88bbee'
+            flatpolys:
+                order: 600
+                color: '#e0ebff'
 
-    roads:
-        data: { source: mapzen}
-        labels:
-            filter: { name: true }
-            highway:
-                filter: { kind: highway, $zoom: { min: 7 } }
-                draw:
-                    text:
-                        font:
-                            family: Helvetica
-                            fill: white
-                            size: 12px
-                            weight: bold
-            not_highway:
-                filter: { not: { kind: highway }, $zoom: { min: 13 } }
-                draw:
-                    text:
-                        font:
-                            family: Helvetica
-                            fill: black
-                            size: 11px
     transportation:
         data: { source: clear}
+        filter:
+            $geometry: line
         motorway:
             filter:
                 class: [motorway]
             draw:
                 flatlines:
                     order: 600
-                    color: '#aab9d9'
+                    color: &motorway-fill '#aab9d9'
                     width: function () { return 0.15*Math.exp(0.25*$zoom) * 156250*Math.exp(-$zoom*0.69) }
                     outline:
                         color: '#789fde'
                         width: &road-casing 1.5px
+                flattext:
+                    font:
+                        family: Helvetica
+                        fill: black
+                        size: 11px
+                        stroke:
+                            color: *motorway-fill
+                            width: 1.5px
             ramp:
                 filter:
                     ramp: [true]
@@ -102,11 +95,19 @@ layers:
             draw:
                 flatlines:
                     order: 600
-                    color: '#fee5b9'
+                    color: &major-fill '#fee5b9'
                     width: function () { return 0.14*Math.exp(0.23*$zoom) * 156250*Math.exp(-$zoom*0.69) }
                     outline:
                         color: '#eac168'
                         width: *road-casing
+                flattext:
+                    font:
+                        family: Helvetica
+                        fill: black
+                        size: 11px
+                        stroke:
+                            color: *major-fill
+                            width: 1.5px
         lessmajor:
             filter:
                 - class: primary
@@ -121,8 +122,16 @@ layers:
                     color: '#f5eaa6'
                     width: function () { return 0.11*Math.exp(0.22*$zoom) * 156250*Math.exp(-$zoom*0.69) }
                     outline:
-                        color: '#d5c953'
+                        color: &lessmajor-fill '#d5c953'
                         width: *road-casing
+                flattext:
+                    font:
+                        family: Helvetica
+                        fill: black
+                        size: 11px
+                        stroke:
+                            color: *lessmajor-fill
+                            width: 1.5px
         minor:
             filter:
                 - class: primary
@@ -136,11 +145,19 @@ layers:
             draw:
                 flatlines:
                     order: 600
-                    color: '#ffffff'
+                    color: &minor-fill '#ffffff'
                     width: function () { return 0.10*Math.exp(0.20*$zoom) * 156250*Math.exp(-$zoom*0.69) }
                     outline:
-                        color: '#aaaaaa'
+                        color: &minor-casing '#aaaaaa'
                         width: *road-casing
+                flattext:
+                    font:
+                        family: Helvetica
+                        fill: black
+                        size: 11px
+                        stroke:
+                            color: *minor-fill
+                            width: 1.5px
         service:
             filter:
                 - class: service
@@ -148,10 +165,10 @@ layers:
             draw:
                 flatlines:
                     order: 600
-                    color: '#ffffff'
+                    color: *minor-fill
                     width: function () { return 0.09*Math.exp(0.18*$zoom) * 156250*Math.exp(-$zoom*0.69) }
                     outline:
-                        color: '#aaaaaa'
+                        color: *minor-casing
                         width: *road-casing
 
         track:
@@ -174,10 +191,10 @@ layers:
             draw:
                 flatlines:
                     order: 600
-                    color: '#777'
+                    color: '#bbb'
                     width: function () { return 0.09*Math.exp(0.18*$zoom) * 156250*Math.exp(-$zoom*0.69) }
                     outline:
-                        color: '#555'
+                        color: '#999'
                         width: *road-casing
         train:
             filter:
@@ -193,16 +210,16 @@ layers:
         hz-train:
             filter:
                 - class: [rail, narrow_gauge]
-                  $zoom: {min: 10}
+                  $zoom: {min: 5}
             draw:
                 0railway:
                     order: 600
-                    color: white
-                    width: 10
-                lines:
+                    color: white'
+                    width: 2px
+                flatlines:
                     order: 600
-                    color: *rail-outer-color
-                    width: 20
+                    color: '#888'
+                    width: 4px
 
 
     buildings:
