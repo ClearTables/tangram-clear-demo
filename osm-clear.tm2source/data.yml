@@ -34,41 +34,24 @@ Layer:
       <<: *osm2pgsql
       table: |-
         (SELECT
-            way
+            way,
+            name
           FROM water_areas
           WHERE way_area > 0.01*!pixel_width!::real*!pixel_height!::real
             AND z(!scale_denominator!) >= 6
         UNION ALL
         SELECT
-            way
+            way,
+            NULL::text AS name
           FROM ocean
           WHERE z(!scale_denominator!) >= 10
         UNION ALL
         SELECT
-            way
+            way,
+            NULL::text AS name
           FROM simplified_ocean
           WHERE z(!scale_denominator!) < 10
         ) AS water
-  - id: waterways
-    geometry: linestring
-    <<: *extents
-    Datasource:
-      <<: *osm2pgsql
-      table: |-
-        (SELECT
-            way,
-            waterway,
-            brunnel,
-            intermittent
-          FROM waterways
-          WHERE waterway IN ('river')
-            OR (z(!scale_denominator!) >= 7 AND waterway IN ('canal'))
-            OR (z(!scale_denominator!) >= 11 AND waterway IN ('stream'))
-            OR (z(!scale_denominator!) >= 13 AND waterway IN ('drain', 'ditch'))
-          ORDER BY layer
-        ) AS waterways
-    properties:
-      minzoom: 5
   - id: buildings
     geometry: polygon
     <<: *extents
