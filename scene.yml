@@ -35,12 +35,9 @@ styles:
                     color.rgb *= vec3(min((worldPosition().z*.001 + .78),1.2));
 
 sources:
-    mapzen:
-        type: TopoJSON
-        url: https://vector.mapzen.com/osm/all/{z}/{x}/{y}.topojson
     clear:
         type: MVT
-        url: http://192.168.1.1:6789/osm-clear.tm2source/tile/{z}/{x}/{y}.pbf?t=3
+        url: http://192.168.1.1:6789/osm-clear.tm2source/tile/{z}/{x}/{y}.pbf
         max_zoom: 16
 
 layers:
