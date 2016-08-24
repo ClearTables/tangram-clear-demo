@@ -1,0 +1,58 @@
+<!doctype html>
+<!--
+    Tangram: real-time WebGL rendering for OpenStreetMap
+
+    http://github.com/tangrams/tangram
+    http://mapzen.com
+-->
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tangram + ClearTables demo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.0-rc.1/leaflet.css" />
+
+    <style>
+        body {
+            margin: 0px;
+            border: 0px;
+            padding: 0px;
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+            position: absolute;
+        }
+
+    </style>
+  </head>
+
+  <body>
+    <div id="map"></div>
+
+    <!-- leaflet -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.0-rc.1/leaflet.js"></script>
+
+    <!-- Main tangram library -->
+    <script src="https://mapzen.com/tangram/0.9/tangram.min.js"></script>
+
+    <!-- Demo setup -->
+    <script>
+      
+        var map = L.map('map');
+
+        var layer = Tangram.leafletLayer({
+            scene: 'scene.yml',
+            attribution: 'Data &copy; <a href="http://www.openstreetmap.org/copyright">OSM contributors</a>'
+        });
+
+        layer.addTo(map);
+
+        map.setView([49.2, -123.25], 10);
+
+    </script>
+
+  </body>
+</html>
