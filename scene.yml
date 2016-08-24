@@ -26,7 +26,6 @@ styles:
         base: lines
         dash: [10, 10]
 
-
     buildings:
         base: polygons
         shaders:
