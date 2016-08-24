@@ -34,7 +34,7 @@
 
     <!-- leaflet -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.0-rc.1/leaflet.js"></script>
-
+    <script src="leaflet-hash.js"></script>
     <!-- Main tangram library -->
     <script src="https://mapzen.com/tangram/0.9/tangram.min.js"></script>
 
@@ -51,7 +51,7 @@
         layer.addTo(map);
 
         map.setView([49.2, -123.25], 10);
-
+        var hash = new L.Hash(map)
     </script>
 
   </body>
