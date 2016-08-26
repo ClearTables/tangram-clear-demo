@@ -40,7 +40,7 @@ styles:
 sources:
     clear:
         type: MVT
-        url: http://tangram-clear-demo.faramir.paulnorman.ca/{z}/{x}/{y}.pbf
+        url: https://tangram-clear-demo.openmapbook.org/{z}/{x}/{y}.pbf
         max_zoom: 16
 
 layers:
